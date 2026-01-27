@@ -75,7 +75,7 @@ final class ViewController: UIViewController {
     }
     
     func setupAppearance() {
-        tableView.backgroundColor = .blue
+        tableView.backgroundColor = .white
     }
     
     func setupBehavior() {
@@ -109,6 +109,13 @@ extension ViewController: UITableViewDataSource {
     ) -> Int {
         sections[section].cells.count
     }
+    
+    func tableView(
+        _ tableView: UITableView,
+        titleForHeaderInSection section: Int
+    ) -> String? {
+        sections[section].title
+    }
 
     func tableView(
         _ tableView: UITableView,
@@ -118,6 +125,13 @@ extension ViewController: UITableViewDataSource {
             withIdentifier: .settingsCell,
             for: indexPath
         )
+        
+        let section = sections[indexPath.section]
+        let item = section.cells[indexPath.row]
+        
+        cell.textLabel?.text = item.title
+        
+        cell.backgroundColor = .lightGray.withAlphaComponent(0.2)
         
         return cell
     }
