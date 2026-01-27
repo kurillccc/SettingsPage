@@ -7,9 +7,52 @@
 
 import UIKit
 
+struct SettingsModel {
+    let title: String
+    let showToggle: Bool
+}
+
+struct SettingsSectionModel {
+    let title: String
+    let cells: [SettingsModel]
+}
+
 final class ViewController: UIViewController {
     
     private let tableView = UITableView(frame: .zero, style: .grouped)
+    
+    private let sections: [SettingsSectionModel] = [
+        SettingsSectionModel(title: "Media", cells: [
+            SettingsModel(
+                title: "Wishlist",
+                showToggle: false
+            ),
+            SettingsModel(
+                title: "Download",
+                showToggle: false
+            )
+        ]),
+        SettingsSectionModel(title: "Preferences", cells: [
+            SettingsModel(
+                title: "Dark Mode",
+                showToggle: true
+            ),
+            SettingsModel(
+                title: "Language",
+                showToggle: false
+            )
+        ]),
+        SettingsSectionModel(title: "Account", cells: [
+            SettingsModel(
+                title: "Logout",
+                showToggle: false
+            ),
+            SettingsModel(
+                title: "Privacy",
+                showToggle: true
+            )
+        ])
+    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,11 +99,15 @@ extension ViewController: UITableViewDelegate {
 
 extension ViewController: UITableViewDataSource {
     
+    func numberOfSections(in tableView: UITableView) -> Int {
+        sections.count
+    }
+    
     func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        54
+        sections[section].cells.count
     }
 
     func tableView(
