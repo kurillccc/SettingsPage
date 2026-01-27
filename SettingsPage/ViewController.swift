@@ -7,9 +7,52 @@
 
 import UIKit
 
+struct SettingsModel {
+    let title: String
+    let showToggle: Bool
+}
+
+struct SettingsSectionModel {
+    let title: String
+    let cells: [SettingsModel]
+}
+
 final class ViewController: UIViewController {
     
     private let tableView = UITableView(frame: .zero, style: .grouped)
+    
+    private let sections: [SettingsSectionModel] = [
+        SettingsSectionModel(title: "Media", cells: [
+            SettingsModel(
+                title: "Wishlist",
+                showToggle: false
+            ),
+            SettingsModel(
+                title: "Download",
+                showToggle: false
+            )
+        ]),
+        SettingsSectionModel(title: "Preferences", cells: [
+            SettingsModel(
+                title: "Dark Mode",
+                showToggle: true
+            ),
+            SettingsModel(
+                title: "Language",
+                showToggle: false
+            )
+        ]),
+        SettingsSectionModel(title: "Account", cells: [
+            SettingsModel(
+                title: "Logout",
+                showToggle: false
+            ),
+            SettingsModel(
+                title: "Privacy",
+                showToggle: true
+            )
+        ])
+    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,7 +75,7 @@ final class ViewController: UIViewController {
     }
     
     func setupAppearance() {
-        tableView.backgroundColor = .blue
+        tableView.backgroundColor = .white
     }
     
     func setupBehavior() {
@@ -56,11 +99,22 @@ extension ViewController: UITableViewDelegate {
 
 extension ViewController: UITableViewDataSource {
     
+    func numberOfSections(in tableView: UITableView) -> Int {
+        sections.count
+    }
+    
     func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        54
+        sections[section].cells.count
+    }
+    
+    func tableView(
+        _ tableView: UITableView,
+        titleForHeaderInSection section: Int
+    ) -> String? {
+        sections[section].title
     }
 
     func tableView(
@@ -71,6 +125,13 @@ extension ViewController: UITableViewDataSource {
             withIdentifier: .settingsCell,
             for: indexPath
         )
+        
+        let section = sections[indexPath.section]
+        let item = section.cells[indexPath.row]
+        
+        cell.textLabel?.text = item.title
+        
+        cell.backgroundColor = .lightGray.withAlphaComponent(0.2)
         
         return cell
     }
