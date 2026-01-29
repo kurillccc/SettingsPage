@@ -89,7 +89,7 @@ final class ViewController: UITableViewController {
 
         tableView.setup(header: tableViewHeader)
         tableView.updateHeaderLayout()
-                
+
         tableView.reloadData()
         
         applyBackgroundForCurrentTrait()
@@ -130,6 +130,32 @@ final class ViewController: UITableViewController {
 // MARK: - UITableViewDelegate
 
 extension ViewController {
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let cell = tableView.cellForRow(at: indexPath) as? SettingsTableViewCell else { return }
+        
+        UIView.animate(withDuration: 0.1, animations: {
+            cell.transform = CGAffineTransform(scaleX: 0.97, y: 0.97)
+            cell.alpha = 0.8
+        }) { _ in
+            UIView.animate(withDuration: 0.3,
+                          delay: 0,
+                          usingSpringWithDamping: 0.5,
+                          initialSpringVelocity: 0.5,
+                          options: .curveEaseInOut,
+                          animations: {
+                cell.transform = .identity
+                cell.alpha = 1.0
+            }) { _ in
+                tableView.deselectRow(at: indexPath, animated: false)
+                self.handleSelection(at: indexPath)
+            }
+        }
+    }
+    
+    private func handleSelection(at indexPath: IndexPath) {
+        print("Выбрана строка: \(indexPath.row)")
+    }
     
 }
 
