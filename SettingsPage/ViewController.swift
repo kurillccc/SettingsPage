@@ -18,9 +18,27 @@ struct SettingsSectionModel {
     let cells: [SettingsModel]
 }
 
+extension UITableView {
+    
+    func setup(header: UIView) {
+        header.translatesAutoresizingMaskIntoConstraints = false
+        tableHeaderView = header
+        header.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
+    }
+    
+    func updateHeaderLayout() {
+        guard let tableHeader = tableHeaderView else { return }
+        
+        tableHeader.setNeedsLayout()
+        tableHeader.layoutIfNeeded()
+    }
+    
+}
+
 final class ViewController: UIViewController {
     
     private let tableView = UITableView(frame: .zero, style: .grouped)
+    private let tableViewHeader = ProfileHeaderView(frame: .zero)
     
     private let sections: [SettingsSectionModel] = [
         SettingsSectionModel(title: "Media", cells: [
@@ -63,22 +81,22 @@ final class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        tableViewHeader.configure(
+            with: UIImage(named: "profile_icon_settings"),
+            name: "firstName secondName",
+            email: "email@.ru"
+        )
+
+        tableView.setup(header: tableViewHeader)
+        tableView.updateHeaderLayout()
+                
+        tableView.reloadData()
         
         view.addSubview(tableView)
-        setupLayout()
         setupAppearance()
         setupBehavior()
-    }
-
-    func setupLayout() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        setupLayout()
     }
     
     func setupAppearance() {
@@ -94,6 +112,18 @@ final class ViewController: UIViewController {
             forCellReuseIdentifier: SettingsTableViewCell.identifier
         )
     }
+    
+    func setupLayout() {
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+
 }
 
 // MARK: - UITableViewDelegate
