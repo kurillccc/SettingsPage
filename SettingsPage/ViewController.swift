@@ -8,6 +8,7 @@
 import UIKit
 
 struct SettingsModel {
+    let iconName: UIImage
     let title: String
     let showToggle: Bool
 }
@@ -17,37 +18,60 @@ struct SettingsSectionModel {
     let cells: [SettingsModel]
 }
 
-final class ViewController: UIViewController {
+extension UITableView {
     
-    private let tableView = UITableView(frame: .zero, style: .grouped)
+    func setup(header: UIView) {
+        header.translatesAutoresizingMaskIntoConstraints = false
+        tableHeaderView = header
+        header.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
+    }
+    
+    func updateHeaderLayout() {
+        guard let tableHeader = tableHeaderView else { return }
+        
+        tableHeader.setNeedsLayout()
+        tableHeader.layoutIfNeeded()
+    }
+    
+}
+
+final class ViewController: UITableViewController {
+    
+    private let tableViewHeader = ProfileHeaderView(frame: .zero)
     
     private let sections: [SettingsSectionModel] = [
         SettingsSectionModel(title: "Media", cells: [
             SettingsModel(
+                iconName: .customHeart,
                 title: "Wishlist",
                 showToggle: false
             ),
             SettingsModel(
+                iconName: .customDownload,
                 title: "Download",
                 showToggle: false
             )
         ]),
         SettingsSectionModel(title: "Preferences", cells: [
             SettingsModel(
+                iconName: .customMoon,
                 title: "Dark Mode",
                 showToggle: true
             ),
             SettingsModel(
+                iconName: .customPlanet,
                 title: "Language",
                 showToggle: false
             )
         ]),
         SettingsSectionModel(title: "Account", cells: [
             SettingsModel(
+                iconName: .customLogout,
                 title: "Logout",
                 showToggle: false
             ),
             SettingsModel(
+                iconName: .customShield,
                 title: "Privacy",
                 showToggle: true
             )
@@ -56,90 +80,147 @@ final class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.addSubview(tableView)
-        setupLayout()
-        setupAppearance()
-        setupBehavior()
-    }
 
-    func setupLayout() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableViewHeader.configure(
+            with: UIImage(named: "profile_icon"),
+            name: "Кирилл Чернов",
+            email: "kurillccc@icloud.com"
+        )
+
+        tableView.setup(header: tableViewHeader)
+        tableView.updateHeaderLayout()
+                
+        tableView.reloadData()
         
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-    }
-    
-    func setupAppearance() {
-        tableView.backgroundColor = .white
-    }
-    
-    func setupBehavior() {
-        tableView.delegate = self
-        tableView.dataSource = self
+        applyBackgroundForCurrentTrait()
         
         tableView.register(
-            UITableViewCell.self,
-            forCellReuseIdentifier: .settingsCell
+            SettingsTableViewCell.self,
+            forCellReuseIdentifier: SettingsTableViewCell.identifier
         )
     }
+    
+    private func applyBackgroundForCurrentTrait() {
+        let imageName = (traitCollection.userInterfaceStyle == .dark)
+              ? "background_settings_dark"
+              : "background_settings_light"
+        tableView.backgroundView = UIImageView(image: UIImage(named: imageName))
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle else { return }
+        applyBackgroundForCurrentTrait()
+        
+        tableView.visibleCells.forEach { cell in
+            if let cell = cell as? SettingsTableViewCell,
+               let indexPath = tableView.indexPath(for: cell) {
+                let model = sections[indexPath.section].cells[indexPath.row]
+                if model.title == "Dark Mode" {
+                    cell.configure(with: model, isOn: (traitCollection.userInterfaceStyle == .dark))
+                } else {
+                    cell.configure(with: model)
+                }
+            }
+        }
+    }
+
 }
 
 // MARK: - UITableViewDelegate
 
-extension ViewController: UITableViewDelegate {
+extension ViewController {
     
 }
 
 // MARK: - UITableViewDataSource
 
-extension ViewController: UITableViewDataSource {
+extension ViewController {
     
-    func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         sections.count
     }
     
-    func tableView(
+    override func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
         sections[section].cells.count
     }
     
-    func tableView(
+    override func tableView(
         _ tableView: UITableView,
         titleForHeaderInSection section: Int
     ) -> String? {
         sections[section].title
     }
 
-    func tableView(
+    override func tableView(
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
-            withIdentifier: .settingsCell,
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: SettingsTableViewCell.identifier,
             for: indexPath
-        )
+        ) as? SettingsTableViewCell else {
+            assertionFailure("Unable to dequeue SettingsTableViewCell")
+            return UITableViewCell()
+        }
         
         let section = sections[indexPath.section]
-        let item = section.cells[indexPath.row]
+        let model = section.cells[indexPath.row]
         
-        cell.textLabel?.text = item.title
+        if model.showToggle {
+            if model.title == "Dark Mode" {
+                cell.configure(with: model, isOn: (traitCollection.userInterfaceStyle == .dark))
+                cell.onToggleChanged = { [weak self] isOn in
+                    guard let self = self else { return }
+                    self.overrideUserInterfaceStyle = isOn ? .dark : .light
+                    self.applyBackgroundForCurrentTrait()
+                }
+            } else {
+                cell.configure(with: model)
+                cell.onToggleChanged = nil
+            }
+        } else {
+            cell.configure(with: model)
+            cell.onToggleChanged = nil
+        }
         
-        cell.backgroundColor = .lightGray.withAlphaComponent(0.2)
+        cell.backgroundColor = .clear
         
         return cell
     }
 
 }
 
-private extension String {
-    static let settingsCell = "SettingsCell"
+// MARK: - Setup Images
+
+extension UIImage {
+    
+    static var customMoon: UIImage {
+        UIImage(named: "moon_settings")!
+    }
+    
+    static var customDownload: UIImage {
+        UIImage(named: "download_settings")!
+    }
+    
+    static var customHeart: UIImage {
+        UIImage(named: "heart_settings")!
+    }
+    
+    static var customLogout: UIImage {
+        UIImage(named: "logout_settings")!
+    }
+    
+    static var customPlanet: UIImage {
+        UIImage(named: "planet_settings")!
+    }
+    
+    static var customShield: UIImage {
+        UIImage(named: "shield_settings")!
+    }
 }
 
 #Preview(traits: .portrait) {
