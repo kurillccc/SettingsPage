@@ -8,6 +8,7 @@
 import UIKit
 
 struct SettingsModel {
+    let iconName: String
     let title: String
     let showToggle: Bool
 }
@@ -24,30 +25,36 @@ final class ViewController: UIViewController {
     private let sections: [SettingsSectionModel] = [
         SettingsSectionModel(title: "Media", cells: [
             SettingsModel(
+                iconName: ".customHeart",
                 title: "Wishlist",
                 showToggle: false
             ),
             SettingsModel(
+                iconName: ".customDownload",
                 title: "Download",
                 showToggle: false
             )
         ]),
         SettingsSectionModel(title: "Preferences", cells: [
             SettingsModel(
+                iconName: ".customMoon",
                 title: "Dark Mode",
                 showToggle: true
             ),
             SettingsModel(
+                iconName: ".customPlanet",
                 title: "Language",
                 showToggle: false
             )
         ]),
         SettingsSectionModel(title: "Account", cells: [
             SettingsModel(
+                iconName: ".customLogout",
                 title: "Logout",
                 showToggle: false
             ),
             SettingsModel(
+                iconName: ".customShield",
                 title: "Privacy",
                 showToggle: true
             )
@@ -75,7 +82,7 @@ final class ViewController: UIViewController {
     }
     
     func setupAppearance() {
-        tableView.backgroundColor = .white
+        tableView.backgroundView = UIImageView(image: UIImage(named: "background_settings_light"))
     }
     
     func setupBehavior() {
