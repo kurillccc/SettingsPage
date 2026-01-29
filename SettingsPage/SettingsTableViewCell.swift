@@ -14,6 +14,8 @@ final class SettingsTableViewCell: UITableViewCell {
     private let arrowImageView = UIImageView()
     private let toggleSwitch = UISwitch()
     
+    var onToggleChanged: ((Bool) -> Void)?
+    
     static let identifier = "SettingsTableViewCell"
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -52,16 +54,17 @@ final class SettingsTableViewCell: UITableViewCell {
         contentView.backgroundColor = .clear
                 
         toggleSwitch.isHidden = true
+        toggleSwitch.addTarget(self, action: #selector(toggleChanged(_:)), for: .valueChanged)
                 
         iconImageView.contentMode = .scaleAspectFit
-        iconImageView.tintColor = .black
+        iconImageView.tintColor = .tertiaryLabel
         
         titleLabel.font = UIFont.systemFont(ofSize: 17)
-        titleLabel.textColor = .black
+        titleLabel.textColor = .label
         
         arrowImageView.image = UIImage(named: "arrow_settings")
         arrowImageView.contentMode = .scaleAspectFit
-        arrowImageView.tintColor = .black
+        arrowImageView.tintColor = .tertiaryLabel
         arrowImageView.isHidden = true
     }
     
@@ -76,15 +79,26 @@ final class SettingsTableViewCell: UITableViewCell {
         titleLabel.text = nil
         arrowImageView.isHidden = false
         toggleSwitch.isHidden = true
-        toggleSwitch.isOn = false // если у переключателя есть состояние вкл/выкл
+        toggleSwitch.isOn = false
+        onToggleChanged = nil
     }
     
-    func configure(with model: SettingsModel) {
+    func configure(with model: SettingsModel, isOn: Bool? = nil) {
         iconImageView.image = model.iconName
         titleLabel.text = model.title
         
         arrowImageView.isHidden = model.showToggle
         toggleSwitch.isHidden = model.showToggle == false
+        
+        if model.showToggle {
+            if let isOn = isOn {
+                toggleSwitch.isOn = isOn
+            }
+        }
+    }
+    
+    @objc private func toggleChanged(_ sender: UISwitch) {
+        onToggleChanged?(sender.isOn)
     }
     
 }

@@ -29,10 +29,10 @@ final class ProfileHeaderView: UIView {
         profileImageView.layer.masksToBounds = true
         
         nameLabel.font = UIFont.systemFont(ofSize: 26, weight: .bold)
-        nameLabel.textColor = .black
+        nameLabel.textColor = .label
         
         emailLabel.font = UIFont.systemFont(ofSize: 20)
-        emailLabel.textColor = .black
+        emailLabel.textColor = .label
         
         [
             profileImageView,

@@ -82,7 +82,7 @@ final class ViewController: UITableViewController {
         super.viewDidLoad()
 
         tableViewHeader.configure(
-            with: UIImage(named: "profile_icon_settings"),
+            with: UIImage(named: "profile_icon"),
             name: "Кирилл Чернов",
             email: "kurillccc@icloud.com"
         )
@@ -92,12 +92,37 @@ final class ViewController: UITableViewController {
                 
         tableView.reloadData()
         
-        tableView.backgroundView = UIImageView(image: UIImage(named: "background_settings_light"))
+        applyBackgroundForCurrentTrait()
         
         tableView.register(
             SettingsTableViewCell.self,
             forCellReuseIdentifier: SettingsTableViewCell.identifier
         )
+    }
+    
+    private func applyBackgroundForCurrentTrait() {
+        let imageName = (traitCollection.userInterfaceStyle == .dark)
+              ? "background_settings_dark"
+              : "background_settings_light"
+        tableView.backgroundView = UIImageView(image: UIImage(named: imageName))
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle else { return }
+        applyBackgroundForCurrentTrait()
+        
+        tableView.visibleCells.forEach { cell in
+            if let cell = cell as? SettingsTableViewCell,
+               let indexPath = tableView.indexPath(for: cell) {
+                let model = sections[indexPath.section].cells[indexPath.row]
+                if model.title == "Dark Mode" {
+                    cell.configure(with: model, isOn: (traitCollection.userInterfaceStyle == .dark))
+                } else {
+                    cell.configure(with: model)
+                }
+            }
+        }
     }
 
 }
@@ -145,7 +170,23 @@ extension ViewController {
         let section = sections[indexPath.section]
         let model = section.cells[indexPath.row]
         
-        cell.configure(with: model)
+        if model.showToggle {
+            if model.title == "Dark Mode" {
+                cell.configure(with: model, isOn: (traitCollection.userInterfaceStyle == .dark))
+                cell.onToggleChanged = { [weak self] isOn in
+                    guard let self = self else { return }
+                    self.overrideUserInterfaceStyle = isOn ? .dark : .light
+                    self.applyBackgroundForCurrentTrait()
+                }
+            } else {
+                cell.configure(with: model)
+                cell.onToggleChanged = nil
+            }
+        } else {
+            cell.configure(with: model)
+            cell.onToggleChanged = nil
+        }
+        
         cell.backgroundColor = .clear
         
         return cell
