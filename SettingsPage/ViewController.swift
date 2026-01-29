@@ -8,7 +8,7 @@
 import UIKit
 
 struct SettingsModel {
-    let iconName: String
+    let iconName: UIImage
     let title: String
     let showToggle: Bool
 }
@@ -25,36 +25,36 @@ final class ViewController: UIViewController {
     private let sections: [SettingsSectionModel] = [
         SettingsSectionModel(title: "Media", cells: [
             SettingsModel(
-                iconName: ".customHeart",
+                iconName: .customHeart,
                 title: "Wishlist",
                 showToggle: false
             ),
             SettingsModel(
-                iconName: ".customDownload",
+                iconName: .customDownload,
                 title: "Download",
                 showToggle: false
             )
         ]),
         SettingsSectionModel(title: "Preferences", cells: [
             SettingsModel(
-                iconName: ".customMoon",
+                iconName: .customMoon,
                 title: "Dark Mode",
                 showToggle: true
             ),
             SettingsModel(
-                iconName: ".customPlanet",
+                iconName: .customPlanet,
                 title: "Language",
                 showToggle: false
             )
         ]),
         SettingsSectionModel(title: "Account", cells: [
             SettingsModel(
-                iconName: ".customLogout",
+                iconName: .customLogout,
                 title: "Logout",
                 showToggle: false
             ),
             SettingsModel(
-                iconName: ".customShield",
+                iconName: .customShield,
                 title: "Privacy",
                 showToggle: true
             )
@@ -90,8 +90,8 @@ final class ViewController: UIViewController {
         tableView.dataSource = self
         
         tableView.register(
-            UITableViewCell.self,
-            forCellReuseIdentifier: .settingsCell
+            SettingsTableViewCell.self,
+            forCellReuseIdentifier: SettingsTableViewCell.identifier
         )
     }
 }
@@ -128,25 +128,50 @@ extension ViewController: UITableViewDataSource {
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
-            withIdentifier: .settingsCell,
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: SettingsTableViewCell.identifier,
             for: indexPath
-        )
+        ) as? SettingsTableViewCell else {
+            assertionFailure("Unable to dequeue SettingsTableViewCell")
+            return UITableViewCell()
+        }
         
         let section = sections[indexPath.section]
-        let item = section.cells[indexPath.row]
+        let model = section.cells[indexPath.row]
         
-        cell.textLabel?.text = item.title
-        
-        cell.backgroundColor = .lightGray.withAlphaComponent(0.2)
+        cell.configure(with: model)
+        cell.backgroundColor = .clear
         
         return cell
     }
 
 }
 
-private extension String {
-    static let settingsCell = "SettingsCell"
+extension UIImage {
+    
+    static var customMoon: UIImage {
+        UIImage(named: "moon_settings")!
+    }
+    
+    static var customDownload: UIImage {
+        UIImage(named: "download_settings")!
+    }
+    
+    static var customHeart: UIImage {
+        UIImage(named: "heart_settings")!
+    }
+    
+    static var customLogout: UIImage {
+        UIImage(named: "logout_settings")!
+    }
+    
+    static var customPlanet: UIImage {
+        UIImage(named: "planet_settings")!
+    }
+    
+    static var customShield: UIImage {
+        UIImage(named: "shield_settings")!
+    }
 }
 
 #Preview(traits: .portrait) {
