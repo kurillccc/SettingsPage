@@ -35,9 +35,8 @@ extension UITableView {
     
 }
 
-final class ViewController: UIViewController {
+final class ViewController: UITableViewController {
     
-    private let tableView = UITableView(frame: .zero, style: .grouped)
     private let tableViewHeader = ProfileHeaderView(frame: .zero)
     
     private let sections: [SettingsSectionModel] = [
@@ -84,8 +83,8 @@ final class ViewController: UIViewController {
 
         tableViewHeader.configure(
             with: UIImage(named: "profile_icon_settings"),
-            name: "firstName secondName",
-            email: "email@.ru"
+            name: "Кирилл Чернов",
+            email: "kurillccc@icloud.com"
         )
 
         tableView.setup(header: tableViewHeader)
@@ -93,68 +92,45 @@ final class ViewController: UIViewController {
                 
         tableView.reloadData()
         
-        view.addSubview(tableView)
-        setupAppearance()
-        setupBehavior()
-        setupLayout()
-    }
-    
-    func setupAppearance() {
         tableView.backgroundView = UIImageView(image: UIImage(named: "background_settings_light"))
-    }
-    
-    func setupBehavior() {
-        tableView.delegate = self
-        tableView.dataSource = self
         
         tableView.register(
             SettingsTableViewCell.self,
             forCellReuseIdentifier: SettingsTableViewCell.identifier
         )
     }
-    
-    func setupLayout() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-    }
 
 }
 
 // MARK: - UITableViewDelegate
 
-extension ViewController: UITableViewDelegate {
+extension ViewController {
     
 }
 
 // MARK: - UITableViewDataSource
 
-extension ViewController: UITableViewDataSource {
+extension ViewController {
     
-    func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         sections.count
     }
     
-    func tableView(
+    override func tableView(
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
         sections[section].cells.count
     }
     
-    func tableView(
+    override func tableView(
         _ tableView: UITableView,
         titleForHeaderInSection section: Int
     ) -> String? {
         sections[section].title
     }
 
-    func tableView(
+    override func tableView(
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
@@ -176,6 +152,8 @@ extension ViewController: UITableViewDataSource {
     }
 
 }
+
+// MARK: - Setup Images
 
 extension UIImage {
     
